@@ -19,12 +19,12 @@ func GinHttps(isHttps bool) error {
 	})
 
 	if isHttps {
-		r.Use(TlsHandler(8000))
+		r.Use(TlsHandler(443))
 
-		return r.RunTLS(":"+strconv.Itoa(8000), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
+		return r.RunTLS(":"+strconv.Itoa(443), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
 	}
 
-	return r.Run(":" + strconv.Itoa(8000))
+	return r.Run(":" + strconv.Itoa(443))
 }
 
 func TlsHandler(port int) gin.HandlerFunc {
