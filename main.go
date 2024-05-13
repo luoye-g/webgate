@@ -1,17 +1,45 @@
 package main
 
 import (
-	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/unrolled/secure"
 )
 
 func main() {
+	GinHttps(true) // 这里false 表示 http 服务，非 https
+}
+
+func GinHttps(isHttps bool) error {
+
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
+	r.GET("/test", func(c *gin.Context) {
+		c.String(200, "test for 【%s】", "https")
 	})
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
+	if isHttps {
+		r.Use(TlsHandler(8000))
+
+		return r.RunTLS(":"+strconv.Itoa(8000), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
+	}
+
+	return r.Run(":" + strconv.Itoa(8000))
+}
+
+func TlsHandler(port int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		secureMiddleware := secure.New(secure.Options{
+			SSLRedirect: true,
+			SSLHost:     ":" + strconv.Itoa(port),
+		})
+		err := secureMiddleware.Process(c.Writer, c.Request)
+
+		// If there was an error, do not continue.
+		if err != nil {
+			return
+		}
+
+		c.Next()
+	}
 }

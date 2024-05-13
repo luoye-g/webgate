@@ -2,7 +2,10 @@ module github.com/luoye-g/webgate
 
 go 1.18
 
-require github.com/gin-gonic/gin v1.10.0
+require (
+	github.com/gin-gonic/gin v1.10.0
+	github.com/unrolled/secure v1.14.0
+)
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
