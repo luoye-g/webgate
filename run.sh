@@ -1,1 +1,1 @@
-sudo ./output/webgate
+nohup ./output/webgate > ./output/log.txt &
