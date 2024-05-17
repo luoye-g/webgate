@@ -18,10 +18,9 @@ func GinHttps() error {
 		c.String(200, "test for 【%s】", "https")
 	})
 
-	// r.Use(TLSHandler(443))
+	r.Use(TLSHandler(443))
 
-	// return r.RunTLS(":"+strconv.Itoa(443), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
-	return r.Run(":80")
+	return r.RunTLS(":"+strconv.Itoa(443), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
 }
 
 func TLSHandler(port int) gin.HandlerFunc {
