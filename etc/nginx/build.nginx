@@ -1,0 +1,2 @@
+./configure --prefix=/home/luoye/nginx --with-http_ssl_module --with-http_v2_module
+make && make install

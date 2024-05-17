@@ -1,0 +1,4 @@
+tar -xvf nginx-1.26.2.tar.gz
+./configure --prefix=/Users/gengxiebo/go/src/github.com/luoye-g/webgate/nginx/nginx-run/ --with-http_ssl_module --with-http_v2_module
+make && make install
+cp ./etc/nginx/nginx.conf ./nginx/nginx-run/conf/

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="data-container">Loading...</div>
+
+    <script>
+
+        // 发送请求的函数
+        async function sendGetRequest(url, session) {
+
+            data = undefined
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'cookie': 'user_session=' + session,
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                data = await response.json();
+                console.log(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+            return data
+        }
+
+          // 获取当前cookie的函数
+          function getCookies() {
+            const cookies = document.cookie.split(';');
+            const cookieArray = [];
+
+            cookies.forEach(cookie => {
+                const [key, value] = cookie.trim().split('=');
+                cookieArray.push({ key, value });
+            });
+
+            return cookieArray;
+        }
+
+        // 调用函数获取当前cookie并打印到控制台
+        const currentCookies = getCookies();
+
+
+        user_session = undefined
+        for (const item of currentCookies) {
+            if (item.key == 'user_session') {
+                user_session = item.value
+            }
+            // console.log(item,item.key,item.value, typeof item);
+        }
+
+        if (user_session == undefined) {
+            // 重定向到登录页面
+            var originalUrl = encodeURIComponent(window.location.href);
+            window.location.href = '/login?redirect=' + originalUrl;
+
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost/api/user_info", false);
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('cookie', 'user_session=' + user_session);
+        xhr.send();
+
+        info = undefined
+        if (xhr.status === 200) {
+            console.log('res: ', xhr.responseText);
+            var jsonData = JSON.parse(xhr.responseText);
+            info = jsonData['user_name'];
+        } else {
+            console.error("Request failed: " + xhr.status);
+        }
+
+        // 假设这是从某个API获取的数据
+        const data = "Hello, World!" + info;
+
+        // 获取HTML元素
+        const dataContainer = document.getElementById('data-container');
+
+        // 设置元素的文本内容
+        dataContainer.textContent = data;
+
+
+
+        // 创建 WebSocket 连接
+        const socket = new WebSocket('ws://localhost/ws');
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 连接建立时触发的事件处理程序
+        socket.onopen = function() {
+            console.log('已连接到服务器');
+        
+            // 发送消息到服务器
+            socket.send('Hello, server!');
+
+            for (let i = 0; i < 100; i++) {
+                await (2000); // 等待2000毫秒（2秒）
+                socket.send('Hello, server!' + i);
+            }
+        };
+
+        // 接收到消息时触发的事件处理程序
+        socket.onmessage = function(event) {
+            console.log('收到消息:', event.data);
+        };
+
+        // 连接关闭时触发的事件处理程序
+        socket.onclose = function() {
+            console.log('已断开与服务器的连接');
+        };
+
+        // 发生错误时触发的事件处理程序
+        socket.onerror = function(error) {
+            console.error('发生错误:', error);
+        };
+    </script>
+</body>
+</html>
