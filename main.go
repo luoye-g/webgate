@@ -14,13 +14,13 @@ func main() {
 func GinHttps() error {
 
 	r := gin.Default()
-	r.GET("/test", func(c *gin.Context) {
+	r.GET("/api", func(c *gin.Context) {
 		c.String(200, "test for 【%s】", "https")
 	})
+	return r.Run(":8080")
+	// r.Use(TLSHandler(443))
 
-	r.Use(TLSHandler(443))
-
-	return r.RunTLS(":"+strconv.Itoa(443), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
+	// return r.RunTLS(":"+strconv.Itoa(443), "./ssh/luoye-g.top.pem", "./ssh/luoye-g.top.rsa.key")
 }
 
 func TLSHandler(port int) gin.HandlerFunc {
