@@ -3,4 +3,5 @@ output
 *.zip
 nginx-1.26.2
 nginx-run
+gbackend/env.json
 env.json
