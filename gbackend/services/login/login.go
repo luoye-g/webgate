@@ -1,8 +1,12 @@
 package login
 
 import (
-	"crypto/md5"
+	"context"
+	"fmt"
+	"time"
 
+	"github.com/luoye-g/webgate/pkg/endecrypt"
+	"github.com/luoye-g/webgate/pkg/redis"
 	"github.com/luoye-g/webgate/repository/user"
 )
 
@@ -19,8 +23,32 @@ func GetLoginService() *LoginService {
 	return loginService
 }
 
-func sessionGen(userName, passWord string) (string, error) {
-	hash := md5.New()
-	hash.Write([]byte(userName + passWord))
-	return string(hash.Sum(nil)), nil
+func (loginService *LoginService) Login(username, password string) (userSession string, timeout int, err error) {
+	user, err := loginService.userRepo.GetUserByUserNameAndPass(username, password)
+	if err != nil {
+		return "", 0, err
+	}
+	if user == nil {
+		return "", 0, err
+	}
+
+	timeout = 360 * 24 // 360 * 24 = 1 day
+	userSession, err = endecrypt.EncryptAES([]byte(fmt.Sprintf("%v", user.ID)), endecrypt.UserSessionkey)
+	if err != nil {
+		return "", 0, err
+	}
+	if userSession == "" {
+		return "", 0, err
+	}
+
+	// 设置缓存
+	if err = redis.GetRedisCli().Set(context.Background(), userSession, user.ID,
+		time.Duration(timeout)*time.Second).Err(); err != nil {
+		return "", 0, err
+	}
+	return userSession, timeout, nil
+}
+
+func (loginService *LoginService) Logout(userSession string) (err error) {
+	return redis.GetRedisCli().Del(context.Background(), userSession).Err()
 }

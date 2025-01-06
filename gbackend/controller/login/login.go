@@ -2,7 +2,7 @@ package login
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/luoye-g/webgate/repository/user"
+	"github.com/luoye-g/webgate/services/login"
 )
 
 type LoginParam struct {
@@ -11,13 +11,9 @@ type LoginParam struct {
 }
 
 func Login(ctx *gin.Context) {
-	var param LoginParam
-	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSON(200, gin.H{
-			"code": 400,
-			"msg":  "参数错误",
-		})
-		return
+	param := LoginParam{
+		Username: ctx.PostForm("username"),
+		Password: ctx.PostForm("password"),
 	}
 
 	if param.Username == "" || param.Password == "" {
@@ -28,8 +24,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	userRepo := user.GetUserRepo()
-	user, err := userRepo.GetUserByUserNameAndPass(param.Username, param.Password)
+	session, timeout, err := login.GetLoginService().Login(param.Username, param.Password)
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"code": 500,
@@ -38,7 +33,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	if user == nil {
+	if session == "" {
 		ctx.JSON(200, gin.H{
 			"code": 400,
 			"msg":  "用户名或密码错误",
@@ -46,4 +41,9 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetCookie("user_session", session, timeout, "/", "", false, true)
+	ctx.JSON(200, gin.H{
+		"code": 200,
+		"msg":  "登录成功",
+	})
 }

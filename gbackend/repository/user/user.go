@@ -1,13 +1,14 @@
 package user
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/luoye-g/webgate/model"
+	"gorm.io/gorm"
 )
 
 type User interface {
 	Create(userName, pass, phone, email string) (*model.User, error)
 	GetUserByUserNameAndPass(username, password string) (*model.User, error)
+	GetByUserID(id uint64) (*model.User, error)
 	// Update(user *model.User) error
 	// Delete(id string) error
 }
@@ -33,7 +34,15 @@ func (u *user) Create(userName, pass, phone, email string) (*model.User, error) 
 
 func (u *user) GetUserByUserNameAndPass(username, password string) (*model.User, error) {
 	user, err := u.UserDao.GetUserByUserNameAndPass(username, password)
-	if err != nil && gorm.IsRecordNotFoundError(err) {
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return user, err
+}
+
+func (u *user) GetByUserID(id uint64) (*model.User, error) {
+	user, err := u.UserDao.GetByUserID(id)
+	if err != nil && err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
 	return user, err

@@ -51,6 +51,12 @@ func (dao *UserDao) Create(userName, pass, phone, email string) (*User, error) {
 	return user, err
 }
 
+func (dao *UserDao) GetByUserID(id uint64) (*User, error) {
+	user := &User{}
+	err := mysql.GetDB().Table(user.TableName()).Where("id = ? and status = ?", id, StatusValid).First(user).Error
+	return user, err
+}
+
 func (dao *UserDao) GetUserByUserNameAndPass(userName, passWord string) (*User, error) {
 	user := &User{}
 	err := mysql.GetDB().Table(user.TableName()).Where("user_name = ? and pass_word = ? and status = ?",
