@@ -1,132 +1,484 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>我的博客 - 欢迎</title>
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/custom.css" rel="stylesheet">
+    <link href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../node_modules/@fontsource/playfair-display/index.css" rel="stylesheet">
+    <link href="../node_modules/@fontsource/dm-sans/index.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; overflow-x: hidden; }
+        body {
+            min-height: 100vh;
+            background: var(--bg-primary);
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 180, 76, 0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(88, 101, 242, 0.04), transparent);
+            pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            background-repeat: repeat; pointer-events: none; z-index: 0;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes accentPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ====== HERO ====== */
+        .hero-section {
+            position: relative; z-index: 5;
+            padding: 80px 28px 60px;
+            text-align: center;
+            animation: fadeSlideUp 0.6s ease both;
+        }
+        .hero-section h1 {
+            font-family: var(--font-display); font-size: 3.2rem; font-weight: 900;
+            color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.12;
+            margin-bottom: 16px;
+        }
+        .hero-section h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #f0c865 50%, var(--accent) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; animation: shimmer 4s linear infinite;
+        }
+        .hero-subtitle {
+            font-size: 1.05rem; color: var(--text-muted); font-weight: 400;
+            letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 28px;
+        }
+        .hero-divider {
+            width: 48px; height: 2px; background: var(--accent);
+            margin: 0 auto 28px; border-radius: 2px; opacity: 0.5;
+        }
+        .hero-actions {
+            display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
+        }
+        .btn-hero {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 10px;
+            font-family: var(--font-body); font-size: 0.92rem; font-weight: 700;
+            letter-spacing: 0.03em; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none; border: none; position: relative; overflow: hidden;
+        }
+        .btn-hero-primary {
+            background: var(--accent); color: var(--bg-primary);
+            box-shadow: 0 2px 12px rgba(232, 180, 76, 0.2);
+        }
+        .btn-hero-primary::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-hero-primary:hover {
+            background: var(--accent-hover); color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(232, 180, 76, 0.35); transform: translateY(-2px);
+        }
+        .btn-hero-primary:hover::before { left: 100%; }
+        .btn-hero-ghost {
+            background: transparent; color: var(--text-secondary);
+            border: 1.5px solid var(--border-subtle);
+        }
+        .btn-hero-ghost:hover {
+            color: var(--accent); border-color: var(--border-accent);
+            background: var(--accent-glow); transform: translateY(-2px);
+        }
+
+        /* User info */
+        .user-info-wrapper {
+            position: fixed; top: 20px; right: 24px; z-index: 100;
+        }
+        .user-chip {
+            position: relative;
+            display: inline-flex; align-items: center;
+        }
+        .user-chip-trigger {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 7px 8px 7px 8px;
+            background: rgba(28, 31, 46, 0.75);
+            border-radius: 48px; border: 1px solid var(--border-subtle);
+            cursor: pointer; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+            text-decoration: none; color: inherit;
+        }
+        .user-chip-trigger:hover {
+            border-color: var(--border-accent);
+            box-shadow: 0 6px 28px rgba(0,0,0,0.3), 0 0 0 1px rgba(232, 180, 76, 0.1);
+            transform: translateY(-1px);
+        }
+        .user-chip.open .user-chip-trigger {
+            border-color: var(--border-accent);
+            background: rgba(35, 38, 57, 0.9);
+        }
+        .chip-avatar {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, #f0c865 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; font-weight: 700; color: var(--bg-primary);
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(232, 180, 76, 0.25);
+            transition: box-shadow 0.3s ease;
+        }
+        .user-chip-trigger:hover .chip-avatar {
+            box-shadow: 0 2px 12px rgba(232, 180, 76, 0.4);
+        }
+        .chip-name {
+            font-family: var(--font-body); font-size: 0.84rem; font-weight: 600;
+            color: var(--text-primary); letter-spacing: 0.01em;
+            max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            padding-right: 2px;
+        }
+        .chip-arrow {
+            width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 0.6rem;
+            transition: transform 0.3s ease, color 0.3s ease;
+            margin-right: 4px;
+        }
+        .user-chip.open .chip-arrow {
+            transform: rotate(180deg); color: var(--accent);
+        }
+        /* Online indicator */
+        .chip-status {
+            position: absolute; bottom: -1px; right: -1px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--success);
+            border: 2px solid var(--bg-primary);
+            z-index: 2;
+        }
+        .chip-avatar-wrap {
+            position: relative; flex-shrink: 0;
+        }
+
+        /* Dropdown */
+        .user-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0;
+            width: 220px;
+            background: rgba(28, 31, 46, 0.95);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+            opacity: 0; visibility: hidden;
+            transform: translateY(-8px) scale(0.97);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 200;
+        }
+        .user-chip.open .user-dropdown {
+            opacity: 1; visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        .dropdown-header {
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .dropdown-header-name {
+            font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 2px;
+        }
+        .dropdown-header-role {
+            font-size: 0.72rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+        }
+        .dropdown-menu-list {
+            padding: 6px;
+        }
+        .dropdown-menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 9px;
+            font-size: 0.84rem; font-weight: 500; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s ease;
+            text-decoration: none; border: none; background: none; width: 100%;
+            font-family: var(--font-body);
+        }
+        .dropdown-menu-item:hover {
+            background: var(--accent-glow); color: var(--accent);
+        }
+        .dropdown-menu-item i {
+            width: 16px; text-align: center; font-size: 0.82rem;
+        }
+        .dropdown-divider {
+            height: 1px; background: var(--border-subtle); margin: 2px 12px;
+        }
+        .dropdown-menu-item.danger { color: var(--danger); }
+        .dropdown-menu-item.danger:hover {
+            background: rgba(232, 93, 93, 0.1); color: var(--danger);
+        }
+
+        .login-buttons-center {
+            display: flex; justify-content: center; gap: 14px; margin-top: 8px;
+        }
+
+        /* ====== FEATURES ====== */
+        .feature-section {
+            position: relative; z-index: 5;
+            padding: 0 28px 48px;
+            animation: fadeSlideUp 0.7s ease 0.15s both;
+        }
+        .feature-grid {
+            max-width: 960px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 14px; padding: 28px 24px; text-align: center;
+            transition: all 0.3s ease; cursor: pointer;
+            position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 2px; background: var(--accent); opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .feature-card:hover {
+            border-color: var(--border-accent); transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            font-size: 2rem; margin-bottom: 14px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .feature-card:nth-child(2) .feature-icon { animation-delay: 0.5s; }
+        .feature-card:nth-child(3) .feature-icon { animation-delay: 1s; }
+        .feature-card h3 {
+            font-family: var(--font-display); font-size: 1.15rem; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 8px;
+        }
+        .feature-card p {
+            font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;
+        }
+
+        /* ====== LATEST POSTS ====== */
+        .posts-section {
+            position: relative; z-index: 5;
+            padding: 48px 28px 60px;
+            animation: fadeSlideUp 0.8s ease 0.25s both;
+        }
+        .posts-header {
+            text-align: center; margin-bottom: 36px;
+        }
+        .posts-header h2 {
+            font-family: var(--font-display); font-size: 1.8rem; font-weight: 800;
+            color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 6px;
+        }
+        .posts-header .accent-line {
+            width: 48px; height: 2px; background: var(--accent);
+            margin: 14px auto 0; border-radius: 2px; opacity: 0.5;
+        }
+
+        /* Blog cards container */
+        #blogList.row.g-4 {
+            display: flex; flex-direction: column; gap: 14px;
+            max-width: 860px; margin: 0 auto;
+        }
+        #blogList > .col-12 { padding: 0; margin-bottom: 0; width: 100%; }
+
+        .modern-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 14px; overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .modern-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--accent); opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modern-card:hover {
+            border-color: var(--border-accent); transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+        .modern-card:hover::before { opacity: 1; }
+        .card-image-wrapper { display: none; }
+        .card-content {
+            padding: 20px 24px; flex: 1;
+            display: flex; flex-direction: column;
+        }
+        .card-title {
+            font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 10px; line-height: 1.4;
+        }
+        .card-meta {
+            display: flex; gap: 14px; align-items: center; margin-bottom: 12px;
+            color: var(--text-muted); font-size: 0.82rem; flex-wrap: wrap;
+        }
+        .meta-left { flex: 1; display: flex; gap: 14px; align-items: center; }
+        .meta-right { display: flex; gap: 14px; align-items: center; }
+        .meta-item {
+            display: flex; align-items: center; gap: 5px;
+            transition: color 0.3s ease;
+        }
+        .meta-item:hover { color: var(--accent); }
+        .meta-icon { font-size: 0.85rem; }
+        .card-excerpt {
+            color: var(--text-secondary); line-height: 1.65; font-size: 0.92rem;
+            flex: 1; margin-bottom: 0;
+        }
+        .card-footer {
+            padding: 12px 24px;
+            border-top: 1px solid var(--border-subtle);
+            background: rgba(35, 38, 57, 0.3);
+            display: flex; justify-content: flex-end;
+        }
+        .read-more-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--accent); text-decoration: none;
+            font-weight: 600; font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        .read-more-link:hover { color: var(--accent-hover); gap: 8px; }
+        .read-more-link .arrow { transition: transform 0.3s ease; font-size: 0.9rem; }
+
+        /* Loading / empty / error states */
+        .blog-loading, .blog-empty, .blog-error {
+            padding: 60px 0; text-align: center;
+        }
+        .blog-empty h3, .blog-error h3 {
+            font-family: var(--font-display); color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .blog-empty p, .blog-error p { color: var(--text-muted); }
+        .blog-error .btn-outline-primary {
+            background: transparent; color: var(--accent);
+            border: 1.5px solid var(--border-accent); border-radius: 8px;
+            padding: 8px 20px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; margin-top: 12px;
+        }
+        .blog-error .btn-outline-primary:hover {
+            background: var(--accent); color: var(--bg-primary);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
+
+        @media (max-width: 768px) {
+            .hero-section { padding: 60px 20px 40px; }
+            .hero-section h1 { font-size: 2.2rem; }
+            .feature-grid { grid-template-columns: 1fr; gap: 12px; }
+            .posts-section { padding: 32px 16px 40px; }
+            .user-info-wrapper { top: 12px; right: 12px; }
+        }
+        @media (max-width: 480px) {
+            .hero-section h1 { font-size: 1.8rem; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .btn-hero { width: 100%; max-width: 260px; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-    <div id="data-container">Loading...</div>
+    <!-- User Info (top-right corner) -->
+    <div class="user-info-wrapper">
+        <div id="user-info-container" style="display: none;"></div>
+    </div>
 
-    <script>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <h1>欢迎来到<br>我的博<span>客</span></h1>
+        <p class="hero-subtitle">Share knowledge · Record growth · Explore infinite</p>
+        <div class="hero-divider"></div>
 
-        // 发送请求的函数
-        async function sendGetRequest(url, session) {
+        <div class="hero-actions">
+            <!-- Login buttons - shown when not logged in -->
+            <div class="login-buttons-center" style="display: none;">
+                <a href="/login" class="btn-hero btn-hero-primary">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </a>
+                <a href="/sign-in" class="btn-hero btn-hero-ghost">
+                    <i class="fas fa-user-plus"></i> 注册
+                </a>
+            </div>
+        </div>
+    </section>
 
-            data = undefined
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'cookie': 'user_session=' + session,
-                    }
-                });
+    <!-- Features -->
+    <section class="feature-section">
+        <div class="feature-grid">
+            <div class="feature-card" onclick="goToBlogCreate()" style="cursor: pointer;">
+                <div class="feature-icon">📝</div>
+                <h3>写博客</h3>
+                <p>记录你的想法和心得，用文字表达你的思考，分享给更多人</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>读博客</h3>
+                <p>浏览其他用户的精彩文章，学习新知识，拓展视野</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>交流互动</h3>
+                <p>与其他用户评论互动，建立社区联系，共同成长</p>
+            </div>
+        </div>
+    </section>
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+    <!-- Latest Posts -->
+    <section class="posts-section">
+        <div class="posts-header">
+            <h2>📖 最新文章</h2>
+            <div class="accent-line"></div>
+        </div>
 
-                data = await response.json();
-                console.log(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-            return data
-        }
+        <div id="blogLoading" class="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">加载中…</p>
+        </div>
 
-          // 获取当前cookie的函数
-          function getCookies() {
-            const cookies = document.cookie.split(';');
-            const cookieArray = [];
+        <div id="blogList" class="row g-4">
+            <!-- Blog list loaded by JS -->
+        </div>
 
-            cookies.forEach(cookie => {
-                const [key, value] = cookie.trim().split('=');
-                cookieArray.push({ key, value });
-            });
+        <div id="blogEmpty" class="blog-empty" style="display: none;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+            <h3>暂无文章</h3>
+            <p>还没有发布的博客，敬请期待！</p>
+        </div>
 
-            return cookieArray;
-        }
+        <div id="blogError" class="blog-error" style="display: none;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">⚠️</div>
+            <h3>加载失败</h3>
+            <p id="blogErrorMsg">加载博客列表失败，请稍后重试</p>
+            <button class="btn btn-outline-primary" onclick="loadLatestBlogs()">重新加载</button>
+        </div>
+    </section>
 
-        // 调用函数获取当前cookie并打印到控制台
-        const currentCookies = getCookies();
-
-
-        user_session = undefined
-        for (const item of currentCookies) {
-            if (item.key == 'user_session') {
-                user_session = item.value
-            }
-            // console.log(item,item.key,item.value, typeof item);
-        }
-
-        if (user_session == undefined) {
-            // 重定向到登录页面
-            var originalUrl = encodeURIComponent(window.location.href);
-            window.location.href = '/login?redirect=' + originalUrl;
-
-        }
-
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://localhost/api/user_info", false);
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('cookie', 'user_session=' + user_session);
-        xhr.send();
-
-        info = undefined
-        if (xhr.status === 200) {
-            console.log('res: ', xhr.responseText);
-            var jsonData = JSON.parse(xhr.responseText);
-            info = jsonData['user_name'];
-        } else {
-            console.error("Request failed: " + xhr.status);
-        }
-
-        // 假设这是从某个API获取的数据
-        const data = "Hello, World!" + info;
-
-        // 获取HTML元素
-        const dataContainer = document.getElementById('data-container');
-
-        // 设置元素的文本内容
-        dataContainer.textContent = data;
-
-
-
-        // 创建 WebSocket 连接
-        const socket = new WebSocket('ws://localhost/ws');
-
-        async function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        // 连接建立时触发的事件处理程序
-        socket.onopen = function() {
-            console.log('已连接到服务器');
-        
-            // 发送消息到服务器
-            socket.send('Hello, server!');
-
-            for (let i = 0; i < 100; i++) {
-                await (2000); // 等待2000毫秒（2秒）
-                socket.send('Hello, server!' + i);
-            }
-        };
-
-        // 接收到消息时触发的事件处理程序
-        socket.onmessage = function(event) {
-            console.log('收到消息:', event.data);
-        };
-
-        // 连接关闭时触发的事件处理程序
-        socket.onclose = function() {
-            console.log('已断开与服务器的连接');
-        };
-
-        // 发生错误时触发的事件处理程序
-        socket.onerror = function(error) {
-            console.error('发生错误:', error);
-        };
-    </script>
+    <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/index.js"></script>
 </body>
 </html>

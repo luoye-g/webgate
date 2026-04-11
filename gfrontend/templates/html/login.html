@@ -1,26 +1,190 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<link href="https://luoye-g.top/assets/css/custom.css" rel="stylesheet">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<div class="container register-form">
-    <form METHOD="POST" ACTION="/api/login">
-        <div class="form">
-            <div class="note">
-                <p>login in</p>
-            </div>
-            <div class="form-content">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="user_name" name="username" value=""/>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" class="form-control" placeholder="password" name="password" value=""/>
-                        </div>
-                    </div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 我的博客</title>
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/custom.css" rel="stylesheet">
+    <link href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../node_modules/@fontsource/playfair-display/index.css" rel="stylesheet">
+    <link href="../node_modules/@fontsource/dm-sans/index.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; overflow-x: hidden; }
+        body {
+            min-height: 100vh;
+            background: var(--bg-primary);
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 180, 76, 0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(88, 101, 242, 0.04), transparent);
+            pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            background-repeat: repeat; pointer-events: none; z-index: 0;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .login-wrapper {
+            position: relative; z-index: 5;
+            width: 100%; max-width: 420px; padding: 40px 24px;
+            animation: fadeSlideUp 0.6s ease both;
+        }
+
+        .login-header {
+            text-align: center; margin-bottom: 36px;
+        }
+        .login-header h1 {
+            font-family: var(--font-display); font-size: 2.2rem; font-weight: 800;
+            color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 8px;
+        }
+        .login-header h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #f0c865 50%, var(--accent) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; animation: shimmer 4s linear infinite;
+        }
+        .login-header p {
+            color: var(--text-muted); font-size: 0.92rem; letter-spacing: 0.02em;
+        }
+        .login-header .divider {
+            width: 40px; height: 2px; background: var(--accent);
+            margin: 16px auto 0; border-radius: 2px; opacity: 0.5;
+        }
+
+        .login-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 18px; padding: 36px 32px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        }
+
+        .form-group { margin-bottom: 22px; position: relative; }
+        .form-group label {
+            display: block; font-size: 0.75rem; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.1em; margin-bottom: 8px;
+        }
+        .form-group .form-control {
+            width: 100%; background: var(--bg-elevated);
+            border: 1.5px solid var(--border-subtle); border-radius: 10px;
+            padding: 13px 16px; font-family: var(--font-body);
+            font-size: 0.95rem; color: var(--text-primary);
+            transition: all 0.3s ease; height: auto;
+        }
+        .form-group .form-control::placeholder { color: var(--text-muted); }
+        .form-group .form-control:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow); background: var(--bg-secondary);
+        }
+
+        #loginMessage {
+            text-align: center; margin-bottom: 16px;
+            font-size: 0.88rem; font-weight: 500;
+        }
+
+        .btn-login {
+            width: 100%; padding: 13px; background: var(--accent);
+            color: var(--bg-primary); border: none; border-radius: 10px;
+            font-family: var(--font-body); font-size: 0.95rem; font-weight: 700;
+            letter-spacing: 0.04em; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 12px rgba(232, 180, 76, 0.2);
+            position: relative; overflow: hidden;
+        }
+        .btn-login::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-login:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 20px rgba(232, 180, 76, 0.35); transform: translateY(-2px);
+        }
+        .btn-login:hover::before { left: 100%; }
+        .btn-login:active { transform: translateY(0); }
+
+        .register-link {
+            text-align: center; margin-top: 24px;
+            font-size: 0.88rem; color: var(--text-muted);
+        }
+        .register-link a {
+            color: var(--accent); text-decoration: none; font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        .register-link a:hover { color: var(--accent-hover); }
+
+        .back-home {
+            text-align: center; margin-top: 16px;
+        }
+        .back-home a {
+            color: var(--text-muted); text-decoration: none; font-size: 0.82rem;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .back-home a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- Header -->
+        <div class="login-header">
+            <h1>欢迎<span>回来</span></h1>
+            <p>输入您的账户信息继续旅程</p>
+            <div class="divider"></div>
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-card">
+            <form>
+                <div class="form-group">
+                    <label for="login-identifier">账户</label>
+                    <input type="text" class="form-control" id="login-identifier" placeholder="手机号码或邮箱地址" required>
                 </div>
-                <button type="submit" class="btnSubmit">login</button>
+
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" class="form-control" id="login-password" placeholder="请输入密码" required>
+                </div>
+
+                <div id="loginMessage" role="status" aria-live="polite"></div>
+
+                <button class="btn-login" type="button" onclick="loginUser(event)">
+                    立即登录
+                </button>
+            </form>
+
+            <div class="register-link">
+                还没有账户？<a href="/sign-in">立即注册</a>
             </div>
         </div>
-    </form>
-</div>
+
+        <div class="back-home">
+            <a href="/"><i class="fas fa-arrow-left"></i> 返回首页</a>
+        </div>
+    </div>
+
+    <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/login.js"></script>
+</body>
+</html>

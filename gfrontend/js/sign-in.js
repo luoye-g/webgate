@@ -1,38 +1,69 @@
+// Registration script: collect form fields and POST JSON to local API
+async function registerUser() {
+    // Removed event.preventDefault() as it's unnecessary for type="button"
+    const username = document.getElementById('reg-username');
+    const email = document.getElementById('reg-email');
+    const phone = document.getElementById('reg-phone');
+    const password = document.getElementById('reg-password');
+    const msgEl = document.getElementById('registerMessage');
 
+    // Basic client-side validation
+    if (!username || !email || !phone || !password) {
+        console.error('Form elements not found');
+        return;
+    }
 
-let domain = 'luoye-g.top'
-/**
- * 登录使用
- */
-function sign_in(event) {
-    event.preventDefault();
-    let email = document.getElementById('floatingInput')
-    let password = document.getElementById('floatingPassword')
+    const payload = {
+        username: username.value.trim(),
+        password: password.value,
+        email: email.value.trim(),
+        phone: phone.value.trim()
+    };
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", 'https://' + domain + '/api/login', false);
-    xhr.setRequestHeader('Accept', 'application/json');
+    if (!payload.username || !payload.password || !payload.email || !payload.phone) {
+        msgEl.textContent = 'Please fill out all fields.';
+        msgEl.className = 'text-danger';
+        return;
+    }
 
-    var formData = new FormData();
+    msgEl.textContent = 'Registering...';
+    msgEl.className = 'text-secondary';
 
-    formData.append("email", email.value);
-    formData.append("password", password.value);
+    try {
+        const resp = await fetch('/api/user/register', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status == 200) {
-                // 成功后直接进行页面跳转
-                console.log('跳转');
-                window.location.href = 'https://' + domain + '/test.html';
-            } else {
-                console.error('Server responded with status:', xhr.status);
-            }
+        const result = await resp.json();
+
+        if (result.code === 200) {
+            msgEl.textContent = 'Registration successful!';
+            msgEl.style.color = 'green';
+            // Optionally clear form
+            username.value = '';
+            email.value = '';
+            phone.value = '';
+            password.value = '';
+            // Redirect to login page
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000); // Redirect after 2 seconds
+        } else {
+            msgEl.textContent = result.msg || 'Registration failed. Please try again.';
+            msgEl.style.color = 'red';
+            console.error('Register failed', resp.status, result.msg);
         }
-    };
-
-    xhr.onerror = function () {
-        console.error('Request failed', xhr.statusText);
-    };
-
-    xhr.send(formData);
+    } catch (err) {
+        msgEl.textContent = 'An error occurred. Please try again later.';
+        msgEl.style.color = 'red';
+        console.error('Network error', err);
+    }
 }
+
+// Export for debugging in browsers that don't allow direct access to functions in modules
+window.registerUser = registerUser;

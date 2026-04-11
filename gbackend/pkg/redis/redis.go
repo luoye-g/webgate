@@ -12,9 +12,8 @@ var rdb *goredis.Client
 
 func InitRedis(host, port, pass string) {
 	rdb = goredis.NewClient(&goredis.Options{
-		Addr:     fmt.Sprintf("%s:%s", host, port),
-		Password: pass,
-		DB:       0,
+		Addr: fmt.Sprintf("%s:%s", host, port),
+		DB:   0,
 	})
 
 	if err := rdb.Set(context.Background(), "init_key", "0", time.Second).Err(); err != nil {

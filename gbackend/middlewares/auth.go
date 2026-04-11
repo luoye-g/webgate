@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/luoye-g/webgate/controller/response"
 	pctx "github.com/luoye-g/webgate/pkg/ctx"
 	"github.com/luoye-g/webgate/pkg/endecrypt"
 	"github.com/luoye-g/webgate/pkg/redis"
@@ -14,53 +15,35 @@ func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userSession, err := ctx.Cookie("user_session")
 		if err != nil {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 			ctx.Abort()
 			return
 		}
 
 		if userSession == "" {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 			ctx.Abort()
 			return
 		}
 
 		_, err = redis.GetRedisCli().Get(ctx, userSession).Result()
 		if err != nil {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 			ctx.Abort()
 			return
 		}
 
 		userIDStr, err := endecrypt.DecryptAES(userSession, endecrypt.UserSessionkey)
 		if err != nil {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 		}
 		userID, err := strconv.ParseUint(userIDStr, 10, 64)
 		if err != nil {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 		}
 		userInfo, err := user.GetUserRepo().GetByUserID(userID)
 		if err != nil || userInfo == nil {
-			ctx.JSON(200, gin.H{
-				"code": 401,
-				"msg":  "未登录",
-			})
+			response.InvalidParam(ctx, "unlogin")
 			ctx.Abort()
 			return
 		}

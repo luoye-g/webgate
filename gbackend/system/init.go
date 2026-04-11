@@ -1,8 +1,6 @@
 package system
 
 import (
-	"encoding/json"
-	"io"
 	"os"
 
 	"github.com/luoye-g/webgate/pkg/mysql"
@@ -23,18 +21,15 @@ type InitConfig struct {
 var config *InitConfig
 
 func configRead() {
-	config = &InitConfig{}
-	file, err := os.Open("env.json")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	contents, err := io.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-	if err = json.Unmarshal(contents, config); err != nil {
-		panic(err)
+	config = &InitConfig{
+		MySQLHost: os.Getenv("MYSQL_HOST"),
+		MySQLPort: os.Getenv("MYSQL_PORT"),
+		MySQLUser: os.Getenv("MYSQL_USER"),
+		MySQLPass: os.Getenv("MYSQL_PASS"),
+
+		RedisHost: os.Getenv("REDIS_HOST"),
+		RedisPort: os.Getenv("REDIS_PORT"),
+		RedisPass: os.Getenv("REDIS_PASS"),
 	}
 }
 

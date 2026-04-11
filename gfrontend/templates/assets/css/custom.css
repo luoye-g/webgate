@@ -1,28 +1,89 @@
-.note
-{
+/* ====== INK NIGHT DESIGN SYSTEM ====== */
+/* Global shared variables and utilities */
+
+:root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #161822;
+    --bg-card: #1c1f2e;
+    --bg-elevated: #232639;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(232, 180, 76, 0.3);
+    --text-primary: #e8e6e1;
+    --text-secondary: #8b8a87;
+    --text-muted: #5a5957;
+    --accent: #e8b44c;
+    --accent-glow: rgba(232, 180, 76, 0.15);
+    --accent-hover: #f0c865;
+    --danger: #e85d5d;
+    --success: #5dcc8f;
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Global loading spinner - dark theme */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(232, 180, 76, 0.15);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.loading-text {
+    margin-top: 15px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+}
+
+/* Vditor dark overrides */
+.vditor {
+    max-width: 100% !important;
+    border: none !important;
+}
+.vditor-content {
+    overflow: hidden !important;
+    border: none !important;
+    background: var(--bg-secondary) !important;
+}
+
+/* Legacy form styles (kept for compatibility) */
+.note {
     text-align: center;
     height: 80px;
-    background: -webkit-linear-gradient(left, #0072ff, #8811c5);
-    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #f0c865);
+    color: var(--bg-primary);
     font-weight: bold;
     line-height: 80px;
 }
-.form-content
-{
+.form-content {
     padding: 5%;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--border-subtle);
     margin-bottom: 2%;
+    background: var(--bg-card);
+    border-radius: 12px;
 }
-.form-control{
-    border-radius:1.5rem;
-}
-.btnSubmit
-{
-    border:none;
-    border-radius:1.5rem;
+.btnSubmit {
+    border: none;
+    border-radius: 1.5rem;
     padding: 1%;
     width: 20%;
     cursor: pointer;
-    background: #0062cc;
-    color: #fff;
+    background: var(--accent);
+    color: var(--bg-primary);
+    font-weight: 700;
 }
