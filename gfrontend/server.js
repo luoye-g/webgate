@@ -57,20 +57,32 @@ app.get('/blog-list', (req, res) => {
 });
 
 app.get('/blog-create', (req, res) => {
-  res.sendFile(path.join(__dirname, 'templates/html/blog-create.html'));
+  res.redirect(301, '/blog-editor');
 });
 
 app.get('/blog-edit/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'templates/html/blog-edit.html'));
+  res.redirect(301, `/blog-editor/${req.params.id}`);
+});
+
+// 统一的博客创建/编辑页（合并页面）
+// /blog-editor           -> create 模式
+// /blog-editor/new       -> create 模式
+// /blog-editor/:id (数字) -> edit 模式
+app.get('/blog-editor', (req, res) => {
+  res.sendFile(path.join(__dirname, 'templates/html/blog-editor.html'));
+});
+
+app.get('/blog-editor/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'templates/html/blog-editor.html'));
 });
 
 app.get('/blog-view/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'templates/html/blog-view.html'));
 });
 
-// 公开博客查看路由（无需登录）
+// 兼容老路径：永久重定向到新的统一路径 /blog-view/:id
 app.get('/blog-public-view/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'templates/html/blog-public-view.html'));
+  res.redirect(301, `/blog-view/${req.params.id}`);
 });
 
 // 启动服务器

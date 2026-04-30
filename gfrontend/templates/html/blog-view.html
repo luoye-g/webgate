@@ -10,22 +10,25 @@
     <link href="../node_modules/@fontsource/playfair-display/index.css" rel="stylesheet">
     <link href="../node_modules/@fontsource/dm-sans/index.css" rel="stylesheet">
     <script src="../node_modules/marked/lib/marked.umd.js"></script>
+    <script src="../node_modules/mermaid/dist/mermaid.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { width: 100%; overflow-x: hidden; }
+        html, body { width: 100%; }
+        html { scroll-behavior: smooth; }
         body {
             min-height: 100vh;
             background: var(--bg-primary);
             font-family: var(--font-body);
             color: var(--text-primary);
             position: relative;
+            padding-top: 64px; /* reserve space for fixed top-bar */
         }
         body::before {
             content: '';
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 180, 76, 0.06), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(88, 101, 242, 0.04), transparent);
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(17, 24, 39, 0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(148, 163, 184, 0.04), transparent);
             pointer-events: none; z-index: 0;
         }
         body::after {
@@ -45,15 +48,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* TOP BAR */
+        /* ========== TOP BAR (fixed) ========== */
         .top-bar {
-            position: relative; z-index: 10;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 28px;
+            padding: 14px 28px;
             border-bottom: 1px solid var(--border-subtle);
-            background: rgba(15, 17, 23, 0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
             animation: fadeSlideDown 0.5s ease both;
+        }
+        .top-bar__left, .top-bar__right {
+            display: flex; align-items: center; gap: 12px;
         }
         .back-link {
             display: inline-flex; align-items: center; gap: 8px;
@@ -68,33 +75,95 @@
         }
         .back-link svg { transition: transform 0.3s ease; }
         .back-link:hover svg { transform: translateX(-3px); }
-        .status-indicator {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 0.88rem; font-weight: 600;
+
+        /* Reading progress bar under the top-bar */
+        .reading-progress {
+            position: fixed;
+            left: 0; right: 0; top: 57px;
+            height: 2px;
+            background: transparent;
+            z-index: 999;
+            pointer-events: none;
         }
-        .status-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 4px 12px; border-radius: 20px;
-            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em;
-        }
-        .status-draft {
-            background: rgba(232, 180, 76, 0.12); color: var(--accent);
-            border: 1px solid rgba(232, 180, 76, 0.2);
-        }
-        .status-published {
-            background: rgba(93, 204, 143, 0.12); color: var(--success);
-            border: 1px solid rgba(93, 204, 143, 0.2);
+        .reading-progress__bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent, #111827), #4b5563);
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
         }
 
-        /* ARTICLE */
+        /* Top-bar inline title (appears once user scrolls past the main title) */
+        .top-bar__title {
+            font-family: var(--font-display);
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--text-primary);
+            max-width: 42ch;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            opacity: 0; transform: translateY(6px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .top-bar.is-scrolled .top-bar__title {
+            opacity: 1; transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Inline action buttons in top-bar (edit/delete) - shown only to author */
+        .top-bar__actions {
+            display: flex; gap: 8px;
+        }
+        .top-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .top-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(17,24,39,0.08);
+        }
+        .top-btn--edit:hover {
+            color: var(--accent); border-color: var(--border-accent);
+            background: var(--accent-glow);
+        }
+        .top-btn--delete:hover {
+            color: var(--danger); border-color: rgba(239,68,68,0.3);
+            background: rgba(239,68,68,0.06);
+        }
+
+        /* ========== LAYOUT ========== */
         .article-section {
             position: relative; z-index: 5;
-            max-width: 820px; margin: 0 auto;
-            padding: 48px 28px 60px;
+            max-width: 1180px; margin: 0 auto;
+            padding: 48px 28px 80px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 280px;
+            gap: 48px;
+            align-items: start;
             animation: fadeSlideUp 0.6s ease 0.1s both;
         }
+        .article-main { min-width: 0; }
+        .article-aside {
+            position: sticky;
+            top: 84px; /* top-bar(57) + progress(2) + gap */
+            align-self: start;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(17,24,39,0.15) transparent;
+            /* soft fade-in when it first appears */
+            opacity: 0;
+            animation: fadeSlideUp 0.5s ease 0.25s forwards;
+        }
+        .article-aside::-webkit-scrollbar { width: 4px; }
+        .article-aside::-webkit-scrollbar-thumb { background: rgba(17,24,39,0.12); border-radius: 4px; }
 
-        /* Loading */
+        /* ========== LOADING ========== */
         .page-loading {
             position: relative; z-index: 5;
             display: flex; flex-direction: column; align-items: center;
@@ -103,7 +172,7 @@
         }
         .page-loading .loading-spinner {
             width: 48px; height: 48px;
-            border: 3px solid rgba(232, 180, 76, 0.12);
+            border: 3px solid rgba(17, 24, 39, 0.12);
             border-top-color: var(--accent); border-radius: 50%;
             animation: spin 0.8s linear infinite; margin-bottom: 18px;
         }
@@ -112,47 +181,136 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ========== ARTICLE TITLE ========== */
         .article-title {
-            font-family: var(--font-display); font-size: 2.4rem; font-weight: 800;
-            color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.25;
-            margin-bottom: 24px;
+            font-family: var(--font-display); font-size: 2.6rem; font-weight: 800;
+            color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.22;
+            margin-bottom: 14px;
+        }
+        .article-kicker {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 36px;
+            font-size: 0.82rem; color: var(--text-muted);
+        }
+        .article-kicker .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-muted); opacity: 0.5; }
+
+        /* ========== SIDEBAR CARDS ========== */
+        .aside-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .aside-card:hover {
+            border-color: rgba(17, 24, 39, 0.16);
+            box-shadow: 0 6px 24px -12px rgba(17, 24, 39, 0.12);
+        }
+        .aside-card__title {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.14em;
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .aside-card__title::before {
+            content: ''; width: 14px; height: 1px; background: var(--text-muted); opacity: 0.4;
         }
 
-        /* Meta card */
-        .article-meta {
-            background: var(--bg-card); border: 1px solid var(--border-subtle);
-            border-radius: 14px; padding: 20px 24px; margin-bottom: 32px;
+        /* -- Author card -- */
+        .author-card { padding: 20px; }
+        .author-row {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px;
         }
-        .meta-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
+        .author-avatar {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            color: #374151;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-display); font-weight: 800; font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 4px 12px rgba(17,24,39,0.08);
+            flex-shrink: 0;
         }
-        .meta-item {
-            display: flex; align-items: center; gap: 10px;
+        .author-info { min-width: 0; flex: 1; }
+        .author-info__name {
+            font-size: 0.98rem; font-weight: 700; color: var(--text-primary);
+            line-height: 1.2;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .meta-icon {
-            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            background: var(--bg-elevated); border-radius: 8px; font-size: 1rem;
-            border: 1px solid var(--border-subtle);
+        .author-info__role {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-top: 2px; font-weight: 500;
         }
-        .meta-label {
-            font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.08em;
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
         }
-        .meta-value {
-            font-size: 0.88rem; font-weight: 600; color: var(--text-primary);
+        .status-badge::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
         }
-        .blog-tags { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .status-draft {
+            background: rgba(17, 24, 39, 0.06); color: #4b5563;
+            border: 1px solid rgba(17, 24, 39, 0.1);
+        }
+        .status-published {
+            background: rgba(16, 185, 129, 0.08); color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* -- Meta info list (label · value) -- */
+        .meta-list { display: flex; flex-direction: column; }
+        .meta-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px dashed rgba(17,24,39,0.08);
+            font-size: 0.82rem;
+        }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-row__label {
+            color: var(--text-muted); font-weight: 500;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .meta-row__label i {
+            font-size: 0.78rem; color: var(--text-muted); opacity: 0.7; width: 12px;
+        }
+        .meta-row__value {
+            color: var(--text-primary); font-weight: 600;
+            max-width: 60%; text-align: right;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .meta-row__value.is-number { font-variant-numeric: tabular-nums; }
+
+        /* -- Tags card -- */
         .blog-tag {
             display: inline-block;
-            background: var(--accent-glow); color: var(--accent);
-            padding: 4px 12px; border-radius: 20px;
-            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
-            border: 1px solid rgba(232, 180, 76, 0.15);
-            margin-right: 6px; margin-bottom: 6px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.74rem; font-weight: 600;
+            border: 1px solid rgba(17, 24, 39, 0.1);
+            margin-right: 5px; margin-bottom: 5px;
+            transition: all 0.2s ease;
+        }
+        .blog-tag:hover {
+            background: var(--accent); color: #fff;
+            transform: translateY(-1px);
         }
 
-        /* Content */
+        /* ========== MARKDOWN CONTENT ========== */
         .blog-content {
             color: var(--text-secondary); line-height: 1.85; font-size: 1.05rem;
             word-wrap: break-word; word-break: break-word;
@@ -178,16 +336,36 @@
             background: var(--accent-glow); padding: 2px 7px; border-radius: 5px;
             font-family: 'SFMono-Regular', 'Consolas', monospace;
             color: var(--accent); font-size: 0.9em;
-            border: 1px solid rgba(232, 180, 76, 0.15);
+            border: 1px solid rgba(17, 24, 39, 0.15);
         }
         .blog-content pre {
             background: var(--bg-elevated); padding: 20px; border-radius: 12px;
             overflow-x: auto; margin-bottom: 1.5em; border: 1px solid var(--border-subtle);
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: inset 0 2px 8px rgba(17, 24, 39, 0.05);
         }
         .blog-content pre code {
             background: none; padding: 0; color: var(--text-primary);
             border: none; font-size: 0.92em;
+        }
+        .blog-content .mermaid {
+            background: #ffffff;
+            padding: 24px;
+            margin: 1.5em 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+            text-align: center;
+            overflow-x: auto;
+            font-family: inherit;
+        }
+        .blog-content .mermaid svg { max-width: 100%; height: auto; display: inline-block; }
+        .blog-content .mermaid-error {
+            background: #fef2f2; color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 14px 18px; margin: 1.5em 0;
+            font-family: 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.85em; white-space: pre-wrap;
         }
         .blog-content blockquote {
             border-left: 3px solid var(--accent); padding: 16px 20px;
@@ -212,84 +390,71 @@
             font-weight: 700; padding: 10px 14px; text-align: left;
             border-bottom: 1px solid var(--border-subtle);
         }
-        .blog-content td {
-            padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);
-        }
+        .blog-content td { padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); }
         .blog-content a {
             color: var(--accent); text-decoration: none; font-weight: 600;
-            border-bottom: 1px solid rgba(232, 180, 76, 0.3);
+            border-bottom: 1px solid rgba(17, 24, 39, 0.3);
             transition: all 0.2s ease;
         }
-        .blog-content a:hover {
-            color: var(--accent-hover); border-bottom-color: var(--accent-hover);
-        }
+        .blog-content a:hover { color: var(--accent-hover); border-bottom-color: var(--accent-hover); }
 
-        /* ACTION BUTTONS */
-        .action-buttons {
-            display: flex; gap: 12px; justify-content: center;
-            margin-top: 48px; padding-top: 32px;
-            border-top: 1px solid var(--border-subtle);
-        }
-        .btn-action {
-            padding: 10px 24px; border-radius: 10px; font-weight: 600;
-            font-size: 0.88rem; transition: all 0.3s ease;
-            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-            letter-spacing: 0.02em; border: 1px solid var(--border-subtle);
-        }
-        .btn-back {
-            background: var(--bg-elevated); color: var(--text-secondary);
-        }
-        .btn-back:hover {
-            background: var(--bg-secondary); color: var(--text-primary);
-            transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        }
-        .btn-edit {
-            background: var(--accent-glow); color: var(--accent);
-            border-color: var(--border-accent);
-        }
-        .btn-edit:hover {
-            background: var(--accent); color: var(--bg-primary);
-            transform: translateY(-2px); box-shadow: 0 4px 16px rgba(232,180,76,0.25);
-        }
-        .btn-delete {
-            background: rgba(232, 93, 93, 0.08); color: var(--danger);
-            border-color: rgba(232, 93, 93, 0.15);
-        }
-        .btn-delete:hover {
-            background: rgba(232, 93, 93, 0.15);
-            transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 6px; }
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
+        ::-webkit-scrollbar-thumb { background: rgba(17, 24, 39, 0.12); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(17, 24, 39, 0.2); }
 
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .article-section {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                max-width: 820px;
+            }
+            .article-aside {
+                position: static;
+                max-height: none;
+                overflow-y: visible;
+                order: -1; /* show author info above content on tablet */
+            }
+            .top-bar__title { display: none; }
+        }
         @media (max-width: 768px) {
-            .top-bar { padding: 12px 16px; }
-            .article-section { padding: 32px 16px 40px; }
-            .article-title { font-size: 1.8rem; }
-            .meta-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .action-buttons { flex-direction: column; align-items: stretch; }
-            .btn-action { justify-content: center; }
+            body { padding-top: 58px; }
+            .top-bar { padding: 10px 16px; }
+            .reading-progress { top: 50px; }
+            .article-section { padding: 28px 16px 48px; }
+            .article-title { font-size: 1.75rem; }
+            .top-bar__actions .top-btn span { display: none; } /* icon-only on mobile */
         }
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
-    <nav class="top-bar">
-        <a href="/blog-list" class="back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
-            </svg>
-            返回列表
-        </a>
-        <div class="status-indicator">
-            <span id="statusBadge" class="status-badge">-</span>
+    <!-- Fixed Top Bar -->
+    <nav class="top-bar" id="topBar">
+        <div class="top-bar__left">
+            <a href="#" class="back-link" id="backLink">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
+                </svg>
+                <span id="backText">返回</span>
+            </a>
+            <span class="top-bar__title" id="topBarTitle"></span>
         </div>
-        <div></div>
+        <div class="top-bar__right">
+            <div class="top-bar__actions" id="ownerActions" style="display: none;">
+                <button class="top-btn top-btn--edit" onclick="editBlog()" title="编辑">
+                    <i class="fas fa-edit"></i><span>编辑</span>
+                </button>
+                <button class="top-btn top-btn--delete" onclick="deleteBlog()" title="删除">
+                    <i class="fas fa-trash-alt"></i><span>删除</span>
+                </button>
+            </div>
+        </div>
     </nav>
+
+    <!-- Reading progress bar -->
+    <div class="reading-progress"><div class="reading-progress__bar" id="readingProgress"></div></div>
 
     <!-- Loading -->
     <div id="loading" class="page-loading">
@@ -297,70 +462,63 @@
         <p class="loading-text">加载博客内容中…</p>
     </div>
 
-    <!-- Article Content -->
+    <!-- Article -->
     <article class="article-section" id="blogContentContainer" style="display: none;">
-        <h1 class="article-title" id="blogTitle">-</h1>
+        <div class="article-main">
+            <h1 class="article-title" id="blogTitle">-</h1>
+            <div class="article-kicker">
+                <span id="kickerAuthor">-</span>
+                <span class="dot"></span>
+                <span id="kickerDate">-</span>
+                <span class="dot"></span>
+                <span><i class="far fa-eye"></i> <span id="kickerViews">0</span></span>
+            </div>
 
-        <div class="article-meta">
-            <div class="meta-grid">
-                <div class="meta-item">
-                    <div class="meta-icon">👤</div>
-                    <div>
-                        <div class="meta-label">作者</div>
-                        <div class="meta-value" id="authorName">-</div>
+            <div class="blog-content" id="blogContent">-</div>
+        </div>
+
+        <aside class="article-aside">
+            <!-- Author card -->
+            <div class="aside-card author-card">
+                <div class="author-row">
+                    <div class="author-avatar" id="authorAvatar">·</div>
+                    <div class="author-info">
+                        <div class="author-info__name" id="authorName">-</div>
+                        <div class="author-info__role">博客作者</div>
                     </div>
                 </div>
-                <div class="meta-item">
-                    <div class="meta-icon">📅</div>
-                    <div>
-                        <div class="meta-label">创建时间</div>
-                        <div class="meta-value" id="createdAt">-</div>
+                <span id="statusBadge" class="status-badge">-</span>
+            </div>
+
+            <!-- Meta info card -->
+            <div class="aside-card">
+                <div class="aside-card__title">文章信息</div>
+                <div class="meta-list">
+                    <div class="meta-row">
+                        <span class="meta-row__label"><i class="far fa-calendar-plus"></i>创建</span>
+                        <span class="meta-row__value" id="createdAt">-</span>
                     </div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-icon">📝</div>
-                    <div>
-                        <div class="meta-label">更新时间</div>
-                        <div class="meta-value" id="updatedAt">-</div>
+                    <div class="meta-row">
+                        <span class="meta-row__label"><i class="far fa-calendar-check"></i>更新</span>
+                        <span class="meta-row__value" id="updatedAt">-</span>
                     </div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-icon">👁️</div>
-                    <div>
-                        <div class="meta-label">浏览数</div>
-                        <div class="meta-value" id="viewCount">-</div>
+                    <div class="meta-row">
+                        <span class="meta-row__label"><i class="far fa-eye"></i>浏览</span>
+                        <span class="meta-row__value is-number" id="viewCount">0</span>
+                    </div>
+                    <div class="meta-row" id="categoryRow" style="display: none;">
+                        <span class="meta-row__label"><i class="far fa-folder"></i>分类</span>
+                        <span class="meta-row__value" id="category">-</span>
                     </div>
                 </div>
             </div>
 
-            <div id="categoryContainer" class="mt-3" style="display: none;">
-                <div class="meta-item">
-                    <div class="meta-icon">📁</div>
-                    <div>
-                        <div class="meta-label">分类</div>
-                        <div class="meta-value" id="category">-</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tagsContainer" class="blog-tags" style="display: none;">
+            <!-- Tags card -->
+            <div class="aside-card" id="tagsContainer" style="display: none;">
+                <div class="aside-card__title">标签</div>
                 <div id="tags"></div>
             </div>
-        </div>
-
-        <div class="blog-content" id="blogContent">-</div>
-
-        <div class="action-buttons">
-            <button class="btn btn-action btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i> 返回
-            </button>
-            <button class="btn btn-action btn-edit" onclick="editBlog()">
-                <i class="fas fa-edit"></i> 编辑
-            </button>
-            <button class="btn btn-action btn-delete" onclick="deleteBlog()">
-                <i class="fas fa-trash-alt"></i> 删除
-            </button>
-        </div>
+        </aside>
     </article>
 
     <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>

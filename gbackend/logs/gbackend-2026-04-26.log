@@ -1,0 +1,6 @@
+{"time":"2026-04-26T20:30:34.3083684+08:00","level":"INFO","msg":"logger_initialized","level":"info","format":"json","dir":"./logs"}
+{"time":"2026-04-26T20:30:34.5362501+08:00","level":"INFO","msg":"server_starting","addr":":9001"}
+{"time":"2026-04-26T20:31:05.7469983+08:00","level":"INFO","msg":"http_request","trace_id":"d88aaa6cf9436ac0","method":"GET","path":"/api/blogs","query":"page=1&page_size=4","client_ip":"127.0.0.1","status":200,"latency":79412000,"body_size":23112}
+{"time":"2026-04-26T20:31:31.5897996+08:00","level":"INFO","msg":"http_request","trace_id":"4ba0186ea4642608","method":"POST","path":"/api/user/login","query":"","client_ip":"127.0.0.1","status":200,"latency":18625800,"body_size":40}
+{"time":"2026-04-26T20:31:32.696885+08:00","level":"INFO","msg":"http_request","trace_id":"2226c1bcf0462ec9","method":"GET","path":"/api/user/info","query":"","client_ip":"127.0.0.1","status":200,"latency":54680800,"body_size":113,"user_id":2}
+{"time":"2026-04-26T20:31:32.7177246+08:00","level":"INFO","msg":"http_request","trace_id":"1b5c9f3c4297301d","method":"GET","path":"/api/blogs","query":"page=1&page_size=4","client_ip":"127.0.0.1","status":200,"latency":74124800,"body_size":23112}

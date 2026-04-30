@@ -1,30 +1,47 @@
-/* ====== INK NIGHT DESIGN SYSTEM ====== */
+/* ====== FROSTED IVORY DESIGN SYSTEM ====== */
+/* Apple-inspired glassmorphism · ink-black accent · white translucent */
 /* Global shared variables and utilities */
 
 :root {
-    --bg-primary: #0f1117;
-    --bg-secondary: #161822;
-    --bg-card: #1c1f2e;
-    --bg-elevated: #232639;
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-accent: rgba(232, 180, 76, 0.3);
-    --text-primary: #e8e6e1;
-    --text-secondary: #8b8a87;
-    --text-muted: #5a5957;
-    --accent: #e8b44c;
-    --accent-glow: rgba(232, 180, 76, 0.15);
-    --accent-hover: #f0c865;
-    --danger: #e85d5d;
-    --success: #5dcc8f;
+    /* --- Surfaces --- */
+    --bg-primary: #f4f5f7;          /* page fog */
+    --bg-secondary: #ffffff;         /* pure surface */
+    --bg-card: rgba(255, 255, 255, 0.66);       /* translucent card */
+    --bg-elevated: rgba(255, 255, 255, 0.85);   /* elevated surface */
+
+    /* --- Borders --- */
+    --border-subtle: rgba(17, 24, 39, 0.08);
+    --border-accent: rgba(17, 24, 39, 0.35);
+
+    /* --- Text --- */
+    --text-primary: #111827;         /* ink black */
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+
+    /* --- Accent (ink black as accent) --- */
+    --accent: #111827;
+    --accent-glow: rgba(17, 24, 39, 0.06);
+    --accent-hover: #374151;
+    --accent-on: #ffffff;            /* text colour on top of accent */
+
+    /* --- Status --- */
+    --danger: #ef4444;
+    --success: #10b981;
+
+    /* --- Glass nav --- */
+    --glass-nav: rgba(255, 255, 255, 0.72);
+    --glass-nav-border: rgba(17, 24, 39, 0.06);
+
+    /* --- Typography --- */
     --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
     --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Global loading spinner - dark theme */
+/* ====== GLOBAL LOADING SPINNER ====== */
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(232, 180, 76, 0.15);
+    border: 3px solid rgba(17, 24, 39, 0.08);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -50,40 +67,396 @@
     font-family: var(--font-body);
 }
 
-/* Vditor dark overrides */
+/* ====== UNIVERSAL OVERRIDES ====== */
+/* Override hard-coded dark values & old gold accent colours used inline
+   across every HTML template so the whole system turns white-glass. */
+
+/* 1. Page ambient (body::before glow) — neutralize the gold/purple halo */
+body::before {
+    background:
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(17, 24, 39, 0.05), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 85% 110%, rgba(17, 24, 39, 0.04), transparent 60%),
+        radial-gradient(ellipse 60% 45% at 10% 110%, rgba(148, 163, 184, 0.08), transparent 60%) !important;
+}
+
+/* 2. Noise texture — lighter on white */
+body::after {
+    opacity: 0.04 !important;
+}
+
+/* 3. Top-bar hard-coded dark glass (rgba(15,17,23,0.85)) → white glass */
+.top-bar {
+    background: var(--glass-nav) !important;
+    border-bottom: 1px solid var(--glass-nav-border) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 24px rgba(17, 24, 39, 0.04) !important;
+}
+
+/* 4. Shimmer / gradient text — swap gold gradient for ink gradient */
+.hero-section h1 span,
+.title-hero h1 span,
+.login-header h1 span,
+.register-header h1 span,
+.section-title .title-accent {
+    background: linear-gradient(135deg, #111827 0%, #6b7280 50%, #111827 100%) !important;
+    background-size: 200% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* 5. Primary buttons (gold → ink black) */
+.btn-hero-primary,
+.btn-create-top,
+.btn-save-top,
+.btn-login,
+.btn-register,
+.btn-modal-confirm,
+.btn-empty-create,
+.btn-switch,
+.btn-nickname-save {
+    background: #111827 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(17, 24, 39, 0.12) !important;
+}
+.btn-hero-primary:hover,
+.btn-create-top:hover,
+.btn-save-top:hover,
+.btn-login:hover,
+.btn-register:hover,
+.btn-modal-confirm:hover,
+.btn-empty-create:hover,
+.btn-switch:hover,
+.btn-nickname-save:hover {
+    background: #374151 !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 22px rgba(17, 24, 39, 0.22) !important;
+}
+
+/* 6. Gold-glow shadow override (all inline gold box-shadows) */
+[class*="btn-"]:hover,
+.modern-card:hover,
+.feature-card:hover,
+.blog-card:hover {
+    /* keep any transform, but replace shadows via explicit rules below */
+}
+
+/* 7. Card-like surfaces → frosted glass */
+.feature-card,
+.modern-card,
+.blog-card,
+.login-card,
+.register-card,
+.article-meta,
+.save-modal-content,
+.user-chip-trigger,
+.user-dropdown,
+.profile-sidebar,
+.stat-item,
+.form-content {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(22px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+    border: 1px solid rgba(17, 24, 39, 0.07) !important;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.7) inset,
+        0 8px 32px rgba(17, 24, 39, 0.05) !important;
+}
+
+.login-card,
+.register-card,
+.save-modal-content {
+    background: rgba(255, 255, 255, 0.78) !important;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 24px 60px rgba(17, 24, 39, 0.10) !important;
+}
+
+.feature-card:hover,
+.modern-card:hover,
+.blog-card:hover {
+    background: rgba(255, 255, 255, 0.82) !important;
+    border-color: rgba(17, 24, 39, 0.18) !important;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 14px 40px rgba(17, 24, 39, 0.10) !important;
+}
+
+/* 8. Elevated backgrounds (inputs, toolbar, icon tiles) */
+.form-group .form-control,
+.modal-form-group input,
+.modal-form-group select,
+.nickname-input,
+#blogTitle,
+.meta-icon,
+.detail-icon,
+.modal-close,
+.btn-action.btn-view,
+.btn-action.btn-edit,
+.btn-action.btn-back,
+.btn-sidebar:not(.btn-switch):not(.btn-logout),
+.pagination-container .page-link,
+.blog-error .btn-outline-primary {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* inputs placeholder */
+.form-group .form-control::placeholder,
+.modal-form-group input::placeholder,
+.nickname-input::placeholder,
+#blogTitle::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* input focus */
+.form-group .form-control:focus,
+.modal-form-group input:focus,
+.modal-form-group select:focus,
+.nickname-input:focus,
+#blogTitle:focus {
+    outline: none !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08) !important;
+    background: #ffffff !important;
+}
+
+/* 9. Tag / chip / badge with gold glow → ink tint */
+.blog-tag {
+    background: rgba(17, 24, 39, 0.05) !important;
+    color: #111827 !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+}
+.status-draft {
+    background: rgba(17, 24, 39, 0.05) !important;
+    color: #4b5563 !important;
+    border: 1px solid rgba(17, 24, 39, 0.10) !important;
+}
+.status-published {
+    background: rgba(16, 185, 129, 0.10) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+/* 10. Danger buttons */
+.btn-delete,
+.btn-logout {
+    background: rgba(239, 68, 68, 0.06) !important;
+    color: var(--danger) !important;
+    border-color: rgba(239, 68, 68, 0.18) !important;
+}
+.btn-delete:hover,
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* publish button (green) */
+.btn-publish {
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: #059669 !important;
+    border-color: rgba(16, 185, 129, 0.22) !important;
+}
+.btn-publish:hover {
+    background: rgba(16, 185, 129, 0.16) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+/* 11. Dropdown item hover uses ink glow */
+.dropdown-menu-item:hover {
+    background: rgba(17, 24, 39, 0.05) !important;
+    color: var(--accent) !important;
+}
+
+/* 12. User-chip (index.html) override dark pill */
+.user-chip-trigger {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 20px rgba(17, 24, 39, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+.user-chip-trigger:hover {
+    border-color: rgba(17, 24, 39, 0.2) !important;
+    box-shadow: 0 6px 26px rgba(17, 24, 39, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+.chip-avatar {
+    background: linear-gradient(135deg, #111827 0%, #4b5563 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(17, 24, 39, 0.25) !important;
+}
+.chip-status {
+    border: 2px solid #ffffff !important;
+}
+.user-dropdown {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    box-shadow: 0 12px 48px rgba(17, 24, 39, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.6) inset !important;
+}
+
+/* 13. Sidebar (profile) translucent */
+.profile-sidebar {
+    background: rgba(255, 255, 255, 0.55) !important;
+    border-right: 1px solid rgba(17, 24, 39, 0.06) !important;
+}
+
+/* 14. Card footer / table header / code block / pre — light bg */
+.card-footer {
+    background: rgba(17, 24, 39, 0.03) !important;
+    border-top: 1px solid rgba(17, 24, 39, 0.06) !important;
+}
+.blog-content pre {
+    background: rgba(17, 24, 39, 0.04) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    box-shadow: inset 0 1px 3px rgba(17, 24, 39, 0.04) !important;
+}
+.blog-content pre code {
+    color: #111827 !important;
+}
+.blog-content code {
+    background: rgba(17, 24, 39, 0.06) !important;
+    color: #111827 !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+}
+.blog-content blockquote {
+    background: rgba(17, 24, 39, 0.03) !important;
+    border-left: 3px solid var(--accent) !important;
+    color: var(--text-secondary) !important;
+}
+.blog-content th {
+    background: rgba(17, 24, 39, 0.04) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08) !important;
+}
+.blog-content a {
+    color: var(--accent) !important;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.3) !important;
+}
+.blog-content a:hover {
+    color: var(--accent-hover) !important;
+    border-bottom-color: var(--accent-hover) !important;
+}
+.blog-content li::marker { color: var(--accent) !important; }
+
+/* 15. Global scrollbar — subtle ink */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: rgba(17, 24, 39, 0.12) !important;
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(17, 24, 39, 0.22) !important;
+}
+
+/* 16. Pagination active */
+.pagination-container .page-link:hover,
+.pagination-container .page-link.active,
+.pagination-container .page-item.active .page-link {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    border-color: var(--accent) !important;
+}
+
+/* 17. Filter tab active (profile page) */
+.filter-tab.active {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    border-color: var(--accent) !important;
+}
+.filter-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+.filter-tab .tab-count {
+    background: rgba(17, 24, 39, 0.08) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* 18. Section title accent bar */
+.section-title::before {
+    background: var(--accent) !important;
+}
+
+/* 19. Accent pulse dot */
+.page-badge .dot {
+    background: var(--accent) !important;
+}
+
+/* 20. Hero / title dividers */
+.hero-divider,
+.title-hero .divider,
+.login-header .divider,
+.register-header .divider,
+.posts-header .accent-line {
+    background: var(--accent) !important;
+    opacity: 0.3 !important;
+}
+
+/* 21. Vditor editor — brighten entire chrome */
 .vditor {
     max-width: 100% !important;
     border: none !important;
 }
-.vditor-content {
-    overflow: hidden !important;
-    border: none !important;
-    background: var(--bg-secondary) !important;
+.vditor-toolbar {
+    background: rgba(255, 255, 255, 0.82) !important;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08) !important;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+.vditor-toolbar button {
+    color: var(--text-secondary) !important;
+}
+.vditor-toolbar button:hover {
+    background: rgba(17, 24, 39, 0.06) !important;
+    color: var(--accent) !important;
+}
+.vditor-toolbar .vditor-toolbar__divider {
+    background: rgba(17, 24, 39, 0.08) !important;
+}
+.vditor-content,
+.vditor-sv,
+.vditor-ir,
+.vditor-wysiwyg {
+    background: #ffffff !important;
+}
+.vditor-reset,
+.vditor-sv .vditor-reset {
+    color: var(--text-primary) !important;
 }
 
-/* Legacy form styles (kept for compatibility) */
-.note {
-    text-align: center;
-    height: 80px;
-    background: linear-gradient(135deg, var(--accent), #f0c865);
-    color: var(--bg-primary);
-    font-weight: bold;
-    line-height: 80px;
+/* 22. Title bar (blog-create / blog-edit) */
+.title-bar {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.06) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
-.form-content {
-    padding: 5%;
-    border: 1px solid var(--border-subtle);
-    margin-bottom: 2%;
-    background: var(--bg-card);
-    border-radius: 12px;
+
+/* 23. Modal overlay backdrop lighter */
+.modal-overlay {
+    background: rgba(17, 24, 39, 0.35) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* 24. Legacy form */
+.note {
+    background: linear-gradient(135deg, #111827, #4b5563) !important;
+    color: #ffffff !important;
 }
 .btnSubmit {
-    border: none;
-    border-radius: 1.5rem;
-    padding: 1%;
-    width: 20%;
-    cursor: pointer;
-    background: var(--accent);
-    color: var(--bg-primary);
-    font-weight: 700;
+    background: var(--accent) !important;
+    color: #ffffff !important;
+}
+.form-content {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+}
+
+/* 25. Text selection */
+::selection {
+    background: rgba(17, 24, 39, 0.18);
+    color: #111827;
 }

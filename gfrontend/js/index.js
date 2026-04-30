@@ -61,7 +61,7 @@ async function checkUserLogin() {
                                 <a class="dropdown-menu-item" href="/profile">
                                     <i class="fas fa-user"></i> 个人中心
                                 </a>
-                                <a class="dropdown-menu-item" href="/blog-create">
+                                <a class="dropdown-menu-item" href="/blog-editor" target="_blank" rel="noopener">
                                     <i class="fas fa-feather-alt"></i> 写文章
                                 </a>
                                 <div class="dropdown-divider"></div>
@@ -157,8 +157,8 @@ function goToBlogCreate() {
         return;
     }
     
-    // 已登录，跳转到博客创建页面
-    window.location.href = '/blog-create';
+    // 已登录，新标签页打开博客创建页面
+    window.open('/blog-editor', '_blank', 'noopener');
 }
 
 // 加载最新博客列表
@@ -175,7 +175,7 @@ async function loadLatestBlogs() {
     blogError.style.display = 'none';
     
     try {
-        const response = await fetch('/api/blogs?page=1&page_size=4', {
+        const response = await fetch('/api/blogs?page=1&page_size=6', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -194,44 +194,79 @@ async function loadLatestBlogs() {
                 return;
             }
             
-            // 渲染博客列表 - 现代化简洁卡片
+            // 渲染博客列表 - 九宫格卡片
+            const escapeHtml = (s) => String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const stripMarkup = (s) => String(s == null ? '' : s)
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/`[^`]*`/g, ' ')
+                .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+                .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/[#>*_~\-]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const GRID_SIZE = 6;
             let html = '';
-            blogs.forEach(blog => {
-                // 截取内容摘要（更长，充分利用空间）
-                const excerpt = blog.content ? 
-                    (blog.content.length > 150 ? blog.content.substring(0, 150) + '...' : blog.content) : 
-                    '暂无内容';
-                
+            blogs.slice(0, GRID_SIZE).forEach((blog, idx) => {
+                const title = blog.title || '无标题';
+                const author = blog.author_name || '未知';
+                const plain = stripMarkup(blog.content);
+                const excerpt = plain
+                    ? (plain.length > 90 ? plain.substring(0, 90) + '…' : plain)
+                    : '暂无内容';
+
                 // 格式化日期
-                const publishedAt = blog.published_at ? 
-                    new Date(blog.published_at).toLocaleDateString('zh-CN') : 
-                    (blog.created_at ? new Date(blog.created_at).toLocaleDateString('zh-CN') : '未知');
-                
+                const rawDate = blog.published_at || blog.created_at;
+                const publishedAt = rawDate
+                    ? new Date(rawDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
+                    : '未知';
+
+                // 字母徽章（取标题首字）
+                const firstChar = (title.trim().charAt(0) || '·').toUpperCase();
+                const readMinutes = Math.max(1, Math.round((plain.length || 0) / 400));
+
                 html += `
-                    <div class="col-12 mb-4">
-                        <div class="blog-card-full">
-                            <div class="card-header">
-                                <h3 class="card-title">${blog.title || '无标题'}</h3>
-                                <div class="meta-info">
-                                    <span class="author">👤 ${blog.author_name || '未知'}</span>
-                                    <span class="date">📅 ${publishedAt}</span>
-                                    <span class="views">👁 ${blog.view_count || 0}</span>
+                    <article class="post-card" style="animation-delay:${idx * 50}ms">
+                        <a class="post-card-link" href="/blog-view/${blog.id}" aria-label="${escapeHtml(title)}">
+                            <div class="post-card-head">
+                                <div class="post-badge" aria-hidden="true">${escapeHtml(firstChar)}</div>
+                                <span class="post-views"><i class="far fa-eye"></i>${blog.view_count || 0}</span>
+                            </div>
+                            <h3 class="post-title">${escapeHtml(title)}</h3>
+                            <p class="post-excerpt">${escapeHtml(excerpt)}</p>
+                            <div class="post-foot">
+                                <div class="post-meta">
+                                    <span class="post-meta-item" title="${escapeHtml(author)}"><i class="far fa-user"></i>${escapeHtml(author)}</span>
+                                    <span class="post-meta-dot"></span>
+                                    <span class="post-meta-item"><i class="far fa-calendar"></i>${escapeHtml(publishedAt)}</span>
                                 </div>
+                                <span class="post-cta" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                             </div>
-                            <div class="card-body">
-                                <p class="excerpt">${excerpt}</p>
-                            </div>
-                            <div class="card-footer">
-                                <a href="/blog-public-view/${blog.id}" class="read-more">阅读全文 →</a>
-                            </div>
+                        </a>
+                    </article>
+                `;
+            });
+
+            // 不足 9 个用占位卡补满九宫格
+            const placeholders = Math.max(0, GRID_SIZE - blogs.length);
+            for (let i = 0; i < placeholders; i++) {
+                html += `
+                    <div class="post-card post-card--placeholder" aria-hidden="true" style="animation-delay:${(blogs.length + i) * 50}ms">
+                        <div class="placeholder-inner">
+                            <div class="placeholder-dot"></div>
+                            <div class="placeholder-dot"></div>
+                            <div class="placeholder-dot"></div>
                         </div>
                     </div>
                 `;
-            });
+            }
             
             blogList.innerHTML = html;
             blogLoading.style.display = 'none';
-            blogList.style.display = 'block';
+            blogList.style.display = 'grid';
         } else {
             // 显示错误状态
             blogLoading.style.display = 'none';

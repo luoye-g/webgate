@@ -312,7 +312,7 @@ function renderPagination(totalPages) {
 // ====== Blog Actions ======
 
 function createBlog() {
-    window.location.href = '/blog-create';
+window.open('/blog-editor', '_blank', 'noopener');
 }
 
 function viewBlog(blogId) {
@@ -320,7 +320,7 @@ function viewBlog(blogId) {
 }
 
 function editBlog(blogId) {
-    window.location.href = `/blog-edit/${blogId}`;
+window.open(`/blog-editor/${blogId}`, '_blank', 'noopener');
 }
 
 async function deleteBlog(blogId) {

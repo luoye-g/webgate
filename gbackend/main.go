@@ -4,6 +4,7 @@ import (
 	"github.com/luoye-g/webgate/controller/blog"
 	"github.com/luoye-g/webgate/controller/user"
 	"github.com/luoye-g/webgate/middlewares"
+	"github.com/luoye-g/webgate/pkg/log"
 	"github.com/luoye-g/webgate/system"
 
 	"github.com/gin-gonic/gin"
@@ -11,8 +12,14 @@ import (
 
 func main() {
 	system.SystemInit()
+	defer func() { _ = log.Sync() }()
 
-	r := gin.Default()
+	r := gin.New()
+
+	// 全局中间件：Recovery -> Logger -> NoCache
+	r.Use(middlewares.Recovery())
+	r.Use(middlewares.Logger())
+	r.Use(middlewares.NoCache())
 
 	// 公开API
 	// login
@@ -40,5 +47,8 @@ func main() {
 		authGroup.GET("/my-blogs", blog.ListMyBlogs)
 	}
 
-	r.Run(":9001")
+	log.Info("server_starting", "addr", ":9001")
+	if err := r.Run(":9001"); err != nil {
+		log.Error("server_exited", "err", err.Error())
+	}
 }

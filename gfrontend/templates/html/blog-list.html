@@ -23,8 +23,8 @@
             content: '';
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 180, 76, 0.06), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(88, 101, 242, 0.04), transparent);
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(17, 24, 39, 0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(148, 163, 184, 0.04), transparent);
             pointer-events: none; z-index: 0;
         }
         body::after {
@@ -58,7 +58,7 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 16px 28px;
             border-bottom: 1px solid var(--border-subtle);
-            background: rgba(15, 17, 23, 0.85);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             animation: fadeSlideDown 0.5s ease both;
         }
@@ -90,18 +90,18 @@
             font-family: var(--font-body); font-size: 0.88rem; font-weight: 700;
             letter-spacing: 0.04em; border: none; border-radius: 8px; cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 12px rgba(232, 180, 76, 0.2);
+            box-shadow: 0 2px 12px rgba(17, 24, 39, 0.2);
             position: relative; overflow: hidden; text-decoration: none;
         }
         .btn-create-top::before {
             content: ''; position: absolute; top: 0; left: -100%;
             width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
             transition: left 0.5s;
         }
         .btn-create-top:hover {
             background: var(--accent-hover); color: var(--bg-primary);
-            box-shadow: 0 4px 20px rgba(232, 180, 76, 0.35); transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(17, 24, 39, 0.35); transform: translateY(-2px);
         }
         .btn-create-top:hover::before { left: 100%; }
 
@@ -116,7 +116,7 @@
             color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 10px;
         }
         .title-hero h1 span {
-            background: linear-gradient(135deg, var(--accent) 0%, #f0c865 50%, var(--accent) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #374151 50%, var(--accent) 100%);
             background-size: 200% auto;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text; animation: shimmer 4s linear infinite;
@@ -144,7 +144,7 @@
             border-radius: 14px; padding: 24px 28px;
             margin-bottom: 16px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 12px rgba(17, 24, 39, 0.05);
             position: relative; overflow: hidden;
         }
         .blog-card::before {
@@ -154,7 +154,7 @@
         }
         .blog-card:hover {
             border-color: var(--border-accent);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 32px rgba(17, 24, 39, 0.06);
             transform: translateY(-3px);
         }
         .blog-card:hover::before { opacity: 1; }
@@ -180,7 +180,7 @@
             background: var(--accent-glow); color: var(--accent);
             padding: 4px 12px; border-radius: 20px;
             font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
-            border: 1px solid rgba(232, 180, 76, 0.15);
+            border: 1px solid rgba(17, 24, 39, 0.15);
         }
         .status-badge {
             display: inline-flex; align-items: center; gap: 4px;
@@ -188,12 +188,12 @@
             font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em;
         }
         .status-draft {
-            background: rgba(232, 180, 76, 0.12); color: var(--accent);
-            border: 1px solid rgba(232, 180, 76, 0.2);
+            background: rgba(17, 24, 39, 0.12); color: var(--accent);
+            border: 1px solid rgba(17, 24, 39, 0.2);
         }
         .status-published {
-            background: rgba(93, 204, 143, 0.12); color: var(--success);
-            border: 1px solid rgba(93, 204, 143, 0.2);
+            background: rgba(16, 185, 129, 0.12); color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
         .blog-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-action {
@@ -208,30 +208,30 @@
         }
         .btn-edit:hover {
             background: var(--accent-glow); color: var(--accent); border-color: var(--border-accent);
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(17,24,39,0.05);
         }
         .btn-delete {
-            background: rgba(232, 93, 93, 0.08); color: var(--danger);
-            border-color: rgba(232, 93, 93, 0.15);
+            background: rgba(239, 68, 68, 0.08); color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.15);
         }
         .btn-delete:hover {
-            background: rgba(232, 93, 93, 0.15); border-color: rgba(232, 93, 93, 0.3);
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(17,24,39,0.05);
         }
         .btn-publish {
-            background: rgba(93, 204, 143, 0.08); color: var(--success);
-            border-color: rgba(93, 204, 143, 0.15);
+            background: rgba(16, 185, 129, 0.08); color: var(--success);
+            border-color: rgba(16, 185, 129, 0.15);
         }
         .btn-publish:hover {
-            background: rgba(93, 204, 143, 0.15); border-color: rgba(93, 204, 143, 0.3);
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(17,24,39,0.05);
         }
         .btn-view {
             background: var(--bg-elevated); color: var(--text-secondary); border-color: var(--border-subtle);
         }
         .btn-view:hover {
             background: var(--accent-glow); color: var(--accent); border-color: var(--border-accent);
-            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(17,24,39,0.05);
         }
 
         /* EMPTY STATE */

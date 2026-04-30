@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/luoye-g/webgate/errors"
 	pctx "github.com/luoye-g/webgate/pkg/ctx"
+	"github.com/luoye-g/webgate/pkg/log"
 	"github.com/luoye-g/webgate/services/user"
 )
 
@@ -26,12 +27,22 @@ func GetUserInfo(ctx *gin.Context) {
 	userInfo, err := user.GetUserService().GetUserInfo(userID)
 	if err != nil {
 		if err.Code() == errors.NotFoundError {
+			log.Warn("get_user_info_not_found",
+				"trace_id", pctx.GetTraceID(ctx),
+				"user_id", userID,
+				"err", err.Error(),
+			)
 			ctx.JSON(200, gin.H{
 				"code": 404,
 				"msg":  err.Error(),
 			})
 			return
 		}
+		log.Error("get_user_info_failed",
+			"trace_id", pctx.GetTraceID(ctx),
+			"user_id", userID,
+			"err", err.Error(),
+		)
 		ctx.JSON(200, gin.H{
 			"code": 500,
 			"msg":  "服务器错误",
@@ -68,6 +79,11 @@ func UpdateUserInfo(ctx *gin.Context) {
 
 	var req UpdateUserInfoRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Warn("update_user_info_invalid_param",
+			"trace_id", pctx.GetTraceID(ctx),
+			"user_id", userID,
+			"err", err.Error(),
+		)
 		ctx.JSON(200, gin.H{
 			"code": 400,
 			"msg":  "参数错误：昵称不能为空",
@@ -77,18 +93,36 @@ func UpdateUserInfo(ctx *gin.Context) {
 
 	if appErr := user.GetUserService().UpdateUserName(userID, req.UserName); appErr != nil {
 		if appErr.Code() == errors.ValidationError {
+			log.Warn("update_user_name_validation_failed",
+				"trace_id", pctx.GetTraceID(ctx),
+				"user_id", userID,
+				"user_name", req.UserName,
+				"err", appErr.Error(),
+			)
 			ctx.JSON(200, gin.H{
 				"code": 400,
 				"msg":  appErr.Error(),
 			})
 			return
 		}
+		log.Error("update_user_name_failed",
+			"trace_id", pctx.GetTraceID(ctx),
+			"user_id", userID,
+			"user_name", req.UserName,
+			"err", appErr.Error(),
+		)
 		ctx.JSON(200, gin.H{
 			"code": 500,
 			"msg":  "服务器错误",
 		})
 		return
 	}
+
+	log.Info("update_user_name_success",
+		"trace_id", pctx.GetTraceID(ctx),
+		"user_id", userID,
+		"user_name", req.UserName,
+	)
 
 	ctx.JSON(200, gin.H{
 		"code": 200,

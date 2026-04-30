@@ -5,6 +5,7 @@ import "github.com/gin-gonic/gin"
 const (
 	UserIDKey      = "user_id"
 	UserSessionKey = "user_session"
+	TraceIDKey     = "trace_id"
 )
 
 func GetUserID(c *gin.Context) uint64 {
@@ -21,4 +22,12 @@ func SetUserSession(c *gin.Context, userSession string) {
 
 func GetUserSession(c *gin.Context) string {
 	return c.GetString(UserSessionKey)
+}
+
+func SetTraceID(c *gin.Context, traceID string) {
+	c.Set(TraceIDKey, traceID)
+}
+
+func GetTraceID(c *gin.Context) string {
+	return c.GetString(TraceIDKey)
 }

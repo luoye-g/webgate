@@ -167,7 +167,7 @@ function renderPagination(totalPages) {
 
 // 创建博客
 function createBlog() {
-    window.location.href = '/blog-create';
+window.open('/blog-editor', '_blank', 'noopener');
 }
 
 // 查看博客
@@ -177,7 +177,7 @@ function viewBlog(blogId) {
 
 // 编辑博客
 function editBlog(blogId) {
-    window.location.href = `/blog-edit/${blogId}`;
+window.open(`/blog-editor/${blogId}`, '_blank', 'noopener');
 }
 
 // 删除博客
